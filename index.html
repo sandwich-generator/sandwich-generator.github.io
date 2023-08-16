@@ -1,0 +1,573 @@
+<!-- 
+	NOTE! I can't prevent you from looking at the code here and spoiling yourself
+	but I REALLY recommend for the sake of fun that you at least find all the secrets
+	first if you wanna take a peek! Anyway, this code sucks but hey, you're playing a
+	sandwich simulator made in a few hours for a minitwow, beggars can't be choosers
+-->
+
+<html>
+
+<head>
+	<meta charset="UTF-16">
+</head>
+
+<body>
+
+<div style="
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-height: 90vh;
+">
+
+<style>
+	p {
+		font-size: 1.5vh;
+	}
+
+	.item {
+		font-size: 2vh;
+		position: relative;
+		border: 2px solid black;
+		left: 50%;
+		width: 2.5vh;
+	}
+
+	.no {
+		display: none;
+	}
+
+</style>
+
+<p id=1 style="font-size: 3vh">&#127838</p>
+<p id=2 style="font-size: 3vh">&#127838</p>
+<p id=3 style="font-size: 3vh">&#127838</p>
+<p id=4 style="font-size: 3vh">&#127838</p>
+<p id=5 style="font-size: 3vh">&#127838</p>
+
+<p style="font-size: 3vh"><br>refresh to generate another "sandwich"</p>
+
+<p id="footer" style="font-size: 2vh"></p>
+
+<p id="counter">sandwich #0</p>
+
+<br>
+
+<div id="items" style="position: relative; left: -1.25vh">
+<p id="hammer"><br></p>
+<p id="wrench"><br></p>
+<p id="egg"><br></p>
+<p id="metal"><br></p>
+<p id="crop"><br></p>
+</div>
+
+<p id="final" class="no" style="background-color: #2aff802a; font-size:1.75vh">
+	<span style="font-size: 3vh">you've reached it.</span>
+	<br>
+	<span style="font-size: 5vh">&#129386</span><br>
+	<span style="font-size: 2vh">the Wraith's perfect sandwich.</span>
+	<br><br><br>
+	congratulations! this is all there is to find for now.<br>
+	feel free to keep rerolling sandwiches until you get one that suits you!<br>
+	this took a long time to make. consider voting for this entry so that it may have been worth it<br><br>
+	<span style="font-size: 1.3vh">p.s.: you can play this from the start again by deleting 
+	all cookies from this webpage somewhere in your browser</span>
+</p>
+
+</div>
+
+<p id="cookie" style="font-size: 1.5vh; text-align: center;">made for bloodbath twow r6</p>
+
+</body>
+
+<script>
+
+const HAMMER = "&#128296";
+const WRENCH = "&#128295";
+const EGG = "&#129370";
+const DEAD = "&#128165";
+const ROCK = "&#11036";
+const NUTS = "&#128297";
+const ROCKET = "&#128640";
+const CHICKEN = "&#128020";
+const KNIFE = "&#128298";
+const COOKEDCHICKEN = "&#127830";
+
+var d = {};
+document.cookie.split(/\s*;\s*/).forEach(function(pair) {
+  pair = pair.split(/\s*=\s*/);
+  d[pair[0]] = pair[1];
+});
+
+if (d["uses"] == undefined) {
+	d["uses"] = 1;
+	document.cookie = "uses=1";
+} else {
+	d["uses"]++;
+	document.cookie = "uses=" + d["uses"];
+}
+
+if (d["sandwich"] != undefined) {
+	document.getElementById("items").remove();
+	document.getElementById("final").classList.remove("no");
+}
+
+document.getElementById("counter").innerHTML = "<br>sandwich #" + d["uses"];
+
+if (d["uses"] >= 10) {
+	if (d["forcespecial"] == undefined) {
+		document.getElementById("footer").innerHTML = "<a href=\"\" onclick=\"specialrefresh()\">...or something else...?</a>";
+	} else if (d["stage"] == undefined || d["stage"] == 0) {
+		document.getElementById("footer").innerHTML = "...or something else...?";
+	} else if (d["sandwich"] == undefined) {
+		document.getElementById("hammer").classList.add("item");
+		document.getElementById("wrench").classList.add("item");
+		document.getElementById("egg").classList.add("item");
+		document.getElementById("metal").classList.add("item");
+		document.getElementById("crop").classList.add("item");
+
+		switch(d["stage"]) {
+			case "1":
+				if (d["forcespecial"] == undefined) {
+					document.getElementById("footer").innerHTML = "...where did that hammer come from? how can you use it?";
+				} else {
+					document.getElementById("footer").innerHTML = "...what is that hammer for?";
+				}
+				break;
+			case "2":
+				document.getElementById("footer").innerHTML = "...a wrench?";
+				break;
+			case "3":
+				document.getElementById("footer").innerHTML = "this is getting out of hand...";
+				break;
+			case "4":
+				if (d["rockstate"] < 2) {
+					document.getElementById("footer").innerHTML = "you scavenged some raw iron from your sandwich.";
+				} else {
+					document.getElementById("footer").innerHTML = "we are living in the space age!";
+				}
+				break;
+			case "5":
+				document.getElementById("footer").innerHTML =
+				"we are almost complete. there's just one thing missing - <span style=\"color: #ff0000\"><b>a sacrifice.</b></span>";
+				break;
+			default:
+				document.getElementById("footer").innerHTML = "...or something else...?";
+				break;
+		}
+
+		if (d["stage"] >= 1) {
+			if (d["blockspecial"] != 2) {
+				d["blockspecial"] = 1;
+				document.cookie = "blockspecial=1";
+			}
+			
+			document.getElementById("hammer").innerHTML = "<a onclick=\"pickup(0)\">"+HAMMER+"</a>";
+		}
+
+		if (d["stage"] >= 2) {
+			document.getElementById("wrench").innerHTML = "<a onclick=\"pickup(1)\">"+WRENCH+"</a>";
+		}
+
+		if (d["stage"] >= 3) {
+			if (d["eggstate"] == 1) {
+				document.getElementById("egg").innerHTML = "<a onclick=\"pickup(2)\">"+EGG+"</a>";
+			}
+			if (d["eggstate"] == 0) {
+				document.getElementById("egg").innerHTML = "<a onclick=\"pickup(2)\">"+DEAD+"</a>";
+			}
+			if (d["eggstate"] == 2) {
+				document.getElementById("egg").innerHTML = "<a onclick=\"pickup(2)\">"+CHICKEN+"</a>";
+			}
+			if (d["eggstate"] == 3) {
+				document.getElementById("egg").innerHTML = "<a onclick=\"pickup(2)\">"+COOKEDCHICKEN+"</a>";
+			}
+		}
+
+		if (d["stage"] >= 4) {
+			if (d["rockstate"] == 0) {
+				document.getElementById("metal").innerHTML = "<a onclick=\"pickup(3)\">"+ROCK+"</a>";
+			} else if (d["rockstate"] == 1) {
+				document.getElementById("metal").innerHTML = "<a onclick=\"pickup(3)\">"+NUTS+"</a>";
+			} else if (d["rockstate"] == 2) {
+				document.getElementById("metal").innerHTML = "<a onclick=\"pickup(3)\">"+ROCKET+"</a>";
+			}
+		}
+
+		if (d["stage"] >= 5) {
+			document.getElementById("crop").innerHTML = "<a onclick=\"pickup(4)\">"+KNIFE+"</a>";
+		}
+	}
+}
+
+special = 0;
+if (d["sandwich"] == undefined && ((Math.random() > 0.91 && d["uses"] >= 10 && d["blockspecial"] != 1) || d["forcespecial"] == 1)) {
+	special = Math.floor(Math.random() * 3 + 2);
+
+	d["forcespecial"] = 0;
+	document.cookie = "forcespecial=0";
+}
+
+for (i = 1; i <= 5; i++) {
+	if (i != special) {
+		document.getElementById(i).innerHTML = [
+			"&#127838", "&#129385", "&#129388", "&#127813"
+		][
+			Math.floor(Math.pow(Math.random(), Math.abs(i-3)/2 + 1) * 4)
+		];
+
+	} else {
+		if (d["stage"] == undefined) {
+			d["stage"] = 0;
+			document.cookie = "stage=0";
+		}
+
+		if (d["stage"] == 0) {
+			document.getElementById(i).innerHTML = "<a href=\"\" onclick=\"stageup()\">"+HAMMER+"</a>";
+		}
+
+		if (d["stage"] == 1) {
+			document.getElementById(i).innerHTML = "<a href=\"\" onclick=\"stageup()\">"+WRENCH+"</a>";
+		}
+
+		if (d["stage"] == 2 || d["eggstate"] == 0) {
+			document.getElementById(i).innerHTML = "<a href=\"\" onclick=\"stageup()\">"+EGG+"</a>";
+		}
+
+		if (d["stage"] == 3 && d["eggstate"] != 0) {
+			document.getElementById(i).innerHTML = "<a href=\"\" onclick=\"stageup()\">"+ROCK+"</a>";
+		}
+
+		if (d["stage"] == 4 && d["rockstate"] == 2 && d["eggstate"] == 2) {
+			document.getElementById(i).innerHTML = "<a href=\"\" onclick=\"stageup()\">"+KNIFE+"</a>";
+		}
+	}
+}
+
+function setitemdefaults() {
+	if (d["stage"] >= 1) {
+		document.getElementById("hammer").innerHTML = "<a onclick=\"pickup(0)\">"+HAMMER+"</a>";
+	}
+	if (d["stage"] >= 2) {
+		document.getElementById("wrench").innerHTML = "<a onclick=\"pickup(1)\">"+WRENCH+"</a>";
+	}
+	if (d["stage"] >= 3) {
+		if (d["eggstate"] == 1) {
+			document.getElementById("egg").innerHTML = "<a onclick=\"pickup(2)\">"+EGG+"</a>";
+		} else if (d["eggstate"] == 0) {
+			document.getElementById("egg").innerHTML = "<a onclick=\"pickup(2)\">"+DEAD+"</a>";
+		} else if (d["eggstate"] == 2) {
+			document.getElementById("egg").innerHTML = "<a onclick=\"pickup(2)\">"+CHICKEN+"</a>";
+		} else if (d["eggstate"] == 3) {
+			document.getElementById("egg").innerHTML = "<a onclick=\"pickup(2)\">"+COOKEDCHICKEN+"</a>";
+		}
+	}
+	if (d["stage"] >= 4) {
+		if (d["rockstate"] == 0) {
+			document.getElementById("metal").innerHTML = "<a onclick=\"pickup(3)\">"+ROCK+"</a>";
+		} else if (d["rockstate"] == 1) {
+			document.getElementById("metal").innerHTML = "<a onclick=\"pickup(3)\">"+NUTS+"</a>";
+		} else if (d["rockstate"] == 2) {
+			document.getElementById("metal").innerHTML = "<a onclick=\"pickup(3)\">"+ROCKET+"</a>";
+		}
+	}
+	if (d["stage"] >= 5) {
+		document.getElementById("crop").innerHTML = "<a onclick=\"pickup(4)\">"+KNIFE+"</a>";
+	}
+}
+
+function interact(a, b) {
+	mn = Math.min(a, b);
+	mx = Math.max(a, b);
+
+	if (mn == 0 && mx == 1) {
+		document.getElementById("footer").innerHTML = "now is not the time for communism.";
+		setitemdefaults();
+		return;
+	}
+
+	if (mn == 0 && mx == 2 && d["eggstate"] == 1) {
+		d["eggstate"] = 0;
+		document.cookie = "eggstate=0";
+		document.getElementById("footer").innerHTML = "you destroyed your egg.";
+		setitemdefaults();
+		return;
+	}
+
+	if (mn == 0 && mx == 2 && d["eggstate"] == 2 && d["stage"] != 5) {
+		d["eggstate"] = 0;
+		document.cookie = "eggstate=0";
+		document.getElementById("footer").innerHTML = "<b><i>...you are a monster.</i></b>";
+		setitemdefaults();
+		return;
+	}
+
+	if (mn == 0 && mx == 2 && d["eggstate"] == 2 && d["stage"] == 5) {
+		document.getElementById("footer").innerHTML = "<span style=\"color: #ff0000\"><b>...no. not that kind of sacrifice.</b></span>";
+		setitemdefaults();
+		return;
+	}
+
+
+	if (mn == 1 && mx == 3 && d["rockstate"] == 0) {
+		document.getElementById("footer").innerHTML = "...how exactly does that work, practically?";
+		setitemdefaults();
+		return;
+	}
+
+	if (mn == 0 && mx == 3 && d["rockstate"] == 0) {
+		document.getElementById("footer").innerHTML = "you made a mechanism!";
+		d["rockstate"] = 1;
+		document.cookie = "rockstate=1";
+		setitemdefaults();
+		return;
+	}
+
+	if (mn == 2 && mx == 3 && d["rockstate"] == 0) {
+		document.getElementById("footer").innerHTML = "you brutally bashed the egg with your block of iron.";
+		d["eggstate"] = 0;
+		document.cookie = "eggstate=0";
+		setitemdefaults();
+		return;
+	}
+
+	if (mn == 1 && mx == 3 && d["rockstate"] == 1) {
+		document.getElementById("footer").innerHTML = "you made yourself a rocket!";
+		d["rockstate"] = 2;
+		document.cookie = "rockstate=2";
+		setitemdefaults();
+		return;
+	}
+
+	if (mn == 0 && mx == 3 && d["rockstate"] == 2) {
+		document.getElementById("footer").innerHTML = "you tried to fix the rocket. it was already working.";
+		setitemdefaults();
+		return;
+	}
+
+	if (mn == 2 && mx == 3 && d["rockstate"] == 2 && d["eggstate"] == 1) {
+		document.getElementById("footer").innerHTML = "the rocket propulsion flames heat up the egg...!";
+		d["eggstate"] = 2;
+		document.cookie = "eggstate=2";
+		setitemdefaults();
+		return;
+	}
+
+	if (mn == 2 && mx == 4 && d["eggstate"] == 2) {
+		document.getElementById("footer").innerHTML = "<span style=\"color: #ff0000\"><b>...no. not that kind of sacrifice.</b></span>";
+		setitemdefaults();
+		return;
+	}
+
+	if (mn == 2 && mx == 3 && d["eggstate"] == 2 && d["rockstate"] == 2) {
+		document.getElementById("footer").innerHTML = "......at least it smells good.";
+		d["eggstate"] = 3;
+		document.cookie = "eggstate=3";
+		setitemdefaults();
+		return;
+	}
+
+	if (mn == 2 && mx == 4 && d["eggstate"] == 3) {
+		d["sandwich"] = 1;
+		document.cookie = "sandwich=1";
+		location.reload();
+	}
+}
+
+function highlightforinteract(target, origin) {
+	if (target == origin) {
+		return;
+	}
+
+	if (target >= d["stage"]) {
+		return;
+	}
+
+	if (target == 0) {
+		document.getElementById("hammer").innerHTML = 
+		"<div style=\"background-color:#a2e4f2\" onclick=\"interact(0, "+origin+")\">"+HAMMER+"</a>";
+	}
+
+	if (target == 1) {
+		document.getElementById("wrench").innerHTML = 
+		"<div style=\"background-color:#a2e4f2\" onclick=\"interact(1, "+origin+")\">"+WRENCH+"</a>";
+	}
+
+	if (target == 2 && d["eggstate"] == 1) {
+		document.getElementById("egg").innerHTML = 
+		"<div style=\"background-color:#a2e4f2\" onclick=\"interact(2, "+origin+")\">"+EGG+"</a>";
+	}
+
+	if (target == 2 && d["eggstate"] == 2) {
+		document.getElementById("egg").innerHTML = 
+		"<div style=\"background-color:#a2e4f2\" onclick=\"interact(2, "+origin+")\">"+CHICKEN+"</a>";
+	}
+
+	if (target == 2 && d["eggstate"] == 3) {
+		document.getElementById("egg").innerHTML = 
+		"<div style=\"background-color:#a2e4f2\" onclick=\"interact(2, "+origin+")\">"+COOKEDCHICKEN+"</a>";
+	}
+
+	if (target == 3 && d["rockstate"] == 0) {
+		document.getElementById("metal").innerHTML = 
+		"<div style=\"background-color:#a2e4f2\" onclick=\"interact(3, "+origin+")\">"+ROCK+"</a>";
+	}
+
+	if (target == 3 && d["rockstate"] == 1) {
+		document.getElementById("metal").innerHTML = 
+		"<div style=\"background-color:#a2e4f2\" onclick=\"interact(3, "+origin+")\">"+NUTS+"</a>";
+	}
+
+	if (target == 3 && d["rockstate"] == 2) {
+		document.getElementById("metal").innerHTML = 
+		"<div style=\"background-color:#a2e4f2\" onclick=\"interact(3, "+origin+")\">"+ROCKET+"</a>";
+	}
+
+	if (target == 4) {
+		document.getElementById("crop").innerHTML = 
+		"<div style=\"background-color:#a2e4f2\" onclick=\"interact(4, "+origin+")\">"+KNIFE+"</a>";
+	}
+}
+
+function pickup(item) {
+	setitemdefaults();
+
+	if (item == 0) {
+		if (d["stage"] < 2) {
+			d["blockspecial"] = 2;
+			document.cookie = "blockspecial=2";
+			document.getElementById("footer").innerHTML = "nothing to use this hammer on... <i>yet.</i>";
+
+		} else {
+			document.getElementById("footer").innerHTML = "how will you use this hammer?";
+		}
+
+		document.getElementById("hammer").innerHTML = "<div style=\"background-color:#4bc160\">"+HAMMER+"</div>";
+		highlightforinteract(1, 0);
+		highlightforinteract(2, 0);
+
+		if (d["rockstate"] == 0 || d["rockstate"] == 2) {
+			highlightforinteract(3, 0);
+		}
+		return;
+	}
+
+	if (item == 1) {
+		document.getElementById("footer").innerHTML = "how will you use this wrench?";
+		document.getElementById("wrench").innerHTML = "<div style=\"background-color:#4bc160\">"+WRENCH+"</div>";
+		highlightforinteract(0, 1);
+
+		if (d["rockstate"] < 2) {
+			highlightforinteract(3, 1);
+		}
+		return;
+	}
+
+	if (item == 2) {
+		if (d["eggstate"] == 0) {
+			document.getElementById("footer").innerHTML = "rip.";
+			return;
+		}
+
+		if (d["eggstate"] == 1) {
+			document.getElementById("footer").innerHTML = "how will you use this egg?";
+			document.getElementById("egg").innerHTML = "<div style=\"background-color:#4bc160\">"+EGG+"</div>";
+			highlightforinteract(0, 2);
+
+			if (d["rockstate"] == 0 || d["rockstate"] == 2) {
+				highlightforinteract(3, 2);
+			}
+		}
+
+		if (d["eggstate"] == 2) {
+			document.getElementById("footer").innerHTML = "<i>bah-gawk!</i>";
+			document.getElementById("egg").innerHTML = "<div style=\"background-color:#4bc160\">"+CHICKEN+"</div>";
+			highlightforinteract(0, 2);
+
+			if (d["stage"] >= 5) {
+				highlightforinteract(4, 2);
+				highlightforinteract(3, 2);
+			}
+		}
+
+		if (d["eggstate"] == 3) {
+			document.getElementById("footer").innerHTML = "chicken";
+			document.getElementById("egg").innerHTML = "<div style=\"background-color:#4bc160\">"+COOKEDCHICKEN+"</div>";
+			highlightforinteract(4, 2);
+		}
+		return;
+	}
+
+	if (item == 3) {
+		if (d["rockstate"] == 0) {
+			document.getElementById("footer").innerHTML = "what can you make with this material?";
+			document.getElementById("metal").innerHTML = "<div style=\"background-color:#4bc160\">"+ROCK+"</div>";
+			highlightforinteract(0, 3);
+			highlightforinteract(1, 3);
+			highlightforinteract(2, 3);
+		}
+
+		if (d["rockstate"] == 1) {
+			document.getElementById("footer").innerHTML = "what silly contraptions will you make?";
+			document.getElementById("metal").innerHTML = "<div style=\"background-color:#4bc160\">"+NUTS+"</div>";
+			highlightforinteract(1, 3);
+		}
+
+		if (d["rockstate"] == 2) {
+			document.getElementById("footer").innerHTML = "it's literally a rocket";
+			document.getElementById("metal").innerHTML = "<div style=\"background-color:#4bc160\">"+ROCKET+"</div>";
+			highlightforinteract(0, 3);
+
+			if (d["eggstate"] == 1) {
+				highlightforinteract(2, 3);
+			}
+
+			if (d["stage"] == 5 && d["eggstate"] == 2) {
+				highlightforinteract(2, 3);
+			}
+		}
+		return;
+	}
+
+	if (item == 4) {
+		document.getElementById("footer").innerHTML = "...";
+
+		document.getElementById("crop").innerHTML = "<div style=\"background-color:#4bc160\">"+KNIFE+"</div>";
+
+		if (d["eggstate"] == 2 || d["eggstate"] == 3) {
+			highlightforinteract(2, 4);
+		}
+		return;
+	}
+
+	setitemdefaults();
+}
+
+function stageup() {
+	if (d["eggstate"] == 0) {
+		d["eggstate"] = 1;
+		document.cookie = "eggstate=1";
+		return;
+	}
+
+	if (d["eggstate"] == undefined && d["stage"] == 2) {
+		d["eggstate"] = 1;
+		document.cookie = "eggstate=1";
+	}
+
+	if (d["rockstate"] == undefined && d["stage"] == 3) {
+		d["rockstate"] = 0;
+		document.cookie = "rockstate=0";
+	}
+
+	d["stage"]++;
+	document.cookie = "stage=" + d["stage"];
+}
+
+function specialrefresh() {
+	if (d["forcespecial"] == undefined) {
+		document.cookie = "forcespecial=1";
+	}
+}
+
+</script>
